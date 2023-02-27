@@ -2,6 +2,8 @@ package game;
 
 import game.enums.PlayerSymbol;
 import game.interfaces.Player;
+import game.players.ComputerPlayer;
+import game.players.HumanPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,10 +17,36 @@ import java.util.Scanner;
  */
 public class TicTacToe {
 
+    /**
+     * Список игроков.
+     */
     private static final List<Player> PLAYERS = new ArrayList<>();
+
+    /**
+     * Флаг окончания игры, true - если игра окончена.
+     */
     private static boolean isGameOver;
+
+    /**
+     * Экземпляр игрового поля.
+     */
     private static GameField field;
 
+    /**
+     * Минимальный размер игрового поля
+     * (минимальная длина выигрышной комбинации
+     * также будет равна этому значению).
+     */
+    private static final int MIN_FIELD_SIZE = 3;
+
+    /**
+     * Максимальный размер игрового поля.
+     */
+    private static final int MAX_FIELD_SIZE = 8;
+
+    /**
+     * Точка старта приложения.
+     */
     public static void main(String[] args) {
 
         // Создаём игровое поле.
@@ -71,11 +99,31 @@ public class TicTacToe {
         field = new GameField(fieldSize, getWinLength(fieldSize));
 
         // Создаём и добавляем в игру двоих игроков.
-        PLAYERS.add(new HumanPlayer("Игрок 1", PlayerSymbol.X));
-        PLAYERS.add(new HumanPlayer("Игрок 2", PlayerSymbol.O));
+        createPlayers();
 
         // Отрисовываем игровое поле.
         field.repaint();
+    }
+
+    /**
+     * Метод создаёт игроков в зависимости от выбранного режима игры.
+     */
+    private static void createPlayers() {
+        Scanner scanner = new Scanner(System.in);
+        int gameMode = 0;
+
+        do {
+            System.out.println("Выберите режим игры:\n1 - друг против друга.\n2 - против компьютера.");
+            try {
+                gameMode = Integer.parseInt(scanner.nextLine());
+            } catch (NumberFormatException e) {
+                // Игнорируем ошибку парсинга введённой строки в число.
+            }
+        } while (gameMode < 1 || gameMode > 2);
+
+        PLAYERS.add(new HumanPlayer("Игрок 1", PlayerSymbol.X));
+        PLAYERS.add(gameMode == 1 ? new HumanPlayer("Игрок 2", PlayerSymbol.O)
+                : new ComputerPlayer(PlayerSymbol.O, field));
     }
 
     /**
@@ -88,15 +136,22 @@ public class TicTacToe {
         int winLength = 0;
         Scanner scanner = new Scanner(System.in);
 
+        // Если размер игрового поля равен минимально возможному,
+        // то выбор длины выигрышной комбинации не имеет смысла,
+        // принимаем её равной размеру поля.
+        if (fieldSize == MIN_FIELD_SIZE) {
+            return fieldSize;
+        }
+
         do {
-            System.out.printf("Введите длину выигрышной комбинации (от 3 до %s).\n", fieldSize);
+            System.out.printf("Введите длину выигрышной комбинации (от %d до %d).\n", MIN_FIELD_SIZE, fieldSize);
 
             try {
                 winLength = Integer.parseInt(scanner.nextLine());
             } catch (NumberFormatException e) {
                 // Игнорируем ошибку парсинга введённой строки в число.
             }
-        } while (winLength < 3 || winLength > fieldSize);
+        } while (winLength < MIN_FIELD_SIZE || winLength > fieldSize);
 
         return winLength;
     }
@@ -111,14 +166,14 @@ public class TicTacToe {
         Scanner scanner = new Scanner(System.in);
 
         do {
-            System.out.println("Введите размер игрового поля (от 3 до 8).");
+            System.out.printf("Введите размер игрового поля (от %d до %d).\n", MIN_FIELD_SIZE, MAX_FIELD_SIZE);
 
             try {
                 fieldSize = Integer.parseInt(scanner.nextLine());
             } catch (NumberFormatException e) {
                 // Игнорируем ошибку парсинга введённой строки в число.
             }
-        } while (fieldSize < 3 || fieldSize > 8);
+        } while (fieldSize < MIN_FIELD_SIZE || fieldSize > MAX_FIELD_SIZE);
 
         return fieldSize;
     }

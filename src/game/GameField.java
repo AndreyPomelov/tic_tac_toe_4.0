@@ -83,26 +83,37 @@ public class GameField {
 
         // Парсим координаты в числовой тип. Если в процессе парсинга возникает ошибка,
         // значит переданы некорректные координаты.
-        int coordinateX, coordinateY;
+        int row, column;
         try {
-            coordinateX = Integer.parseInt(coordinatesValues[0]) - 1;
-            coordinateY = Integer.parseInt(coordinatesValues[1]) - 1;
+            row = Integer.parseInt(coordinatesValues[0]);
+            column = Integer.parseInt(coordinatesValues[1]);
         } catch (Exception e) {
             return false;
         }
 
         // Проверяем, не занята ли уже указанная ячейка.
         try {
-            if (field[coordinateX][coordinateY] != EMPTY_CELL) {
+            if (isCellOccupied(row, column)) {
                 return false;
             }
             // Заполняем указанную ячейку символом игрока.
-            field[coordinateX][coordinateY] = symbol.getValue();
+            field[row - 1][column - 1] = symbol.getValue();
         } catch (Exception e) {
             return false;
         }
 
         return true;
+    }
+
+    /**
+     * Проверка, занята ли выбранная ячейка.
+     *
+     * @param row       номер строки.
+     * @param column    номер столбца.
+     * @return          true, если ячейка занята.
+     */
+    public boolean isCellOccupied(int row, int column) {
+        return field[row - 1][column - 1] != EMPTY_CELL;
     }
 
     /**
@@ -233,5 +244,14 @@ public class GameField {
             }
         }
         return symbolCounter == WIN_LENGTH;
+    }
+
+    /**
+     * Геттер.
+     *
+     * @return размер игрового поля.
+     */
+    public int getFieldSize() {
+        return FIELD_SIZE;
     }
 }
